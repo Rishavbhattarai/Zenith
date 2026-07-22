@@ -3,6 +3,19 @@ ingestion-mesh/ingestor
 *.test
 *.out
 
+# Python
+notetaker-mcp/.venv/
+notetaker-mcp/__pycache__/
+notetaker-mcp/**/__pycache__/
+notetaker-mcp/.pytest_cache/
+notetaker-mcp/.env
+
+# Node / Next.js
+field-app/node_modules/
+field-app/.next/
+field-app/.env.local
+field-app/.env
+
 # OS
 .DS_Store
 

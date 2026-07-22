@@ -1,0 +1,31 @@
+"""Real MCP server (stdio transport) exposing the field-note processing
+pipeline as a tool, usable by any MCP client (Claude Code/Desktop, or later
+the Phase 4 dashboard)."""
+
+from __future__ import annotations
+
+from mcp.server.fastmcp import FastMCP
+
+from notetaker.config import get_llm_client
+from notetaker.core import process_field_note
+from notetaker.schema import NoteProcessingResult
+
+mcp = FastMCP("zenith-notetaker")
+_llm = get_llm_client()
+
+
+@mcp.tool()
+def process_field_note_tool(raw_text: str, asset_id: str | None = None) -> NoteProcessingResult:
+    """Extract structured data (action items, parts used, telemetry claims)
+    from a field technician's raw note, and flag any contradictions between
+    the technician's claims and the asset's live telemetry.
+
+    Args:
+        raw_text: The raw field note, as typed or transcribed from voice.
+        asset_id: The asset the technician was physically working on, if known.
+    """
+    return process_field_note(raw_text, _llm, asset_id=asset_id)
+
+
+if __name__ == "__main__":
+    mcp.run()
