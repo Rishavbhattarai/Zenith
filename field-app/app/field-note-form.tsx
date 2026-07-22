@@ -43,6 +43,10 @@ export default function FieldNoteForm() {
   // branching on it during render causes a client/server hydration mismatch.
   const [speechSupported, setSpeechSupported] = useState(false);
   useEffect(() => {
+    // Intentional: detecting browser feature support has to happen after
+    // mount (no `window` during SSR); there's no external event to
+    // subscribe to instead.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSpeechSupported(
       "SpeechRecognition" in window || "webkitSpeechRecognition" in window
     );
