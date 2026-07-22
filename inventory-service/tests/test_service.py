@@ -55,3 +55,16 @@ async def test_record_installation_unmatched_part(conn, asset_factory):
     assert not result.matched
     assert result.new_stock is None
     assert not result.reorder_triggered
+
+
+async def test_record_installation_auto_registers_unseen_asset(conn, part_factory):
+    # Phase 1 generates asset IDs dynamically -- record_installation must
+    # not require the asset to have been pre-seeded in the `assets` table.
+    await part_factory(part_name="widget", stock_quantity=10, reorder_threshold=5)
+
+    result = await record_installation(conn, "asset-9999", "widget", 1, "tech-1")
+
+    assert result.matched
+    assert result.new_stock == 9
+    row = await conn.fetchrow("SELECT asset_id FROM assets WHERE asset_id = 'asset-9999'")
+    assert row is not None

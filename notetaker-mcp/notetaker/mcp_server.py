@@ -9,6 +9,7 @@ from mcp.server.fastmcp import FastMCP
 from notetaker.config import get_llm_client
 from notetaker.core import process_field_note
 from notetaker.schema import NoteProcessingResult
+from notetaker.support_agent import SupportAnswer, ask_support_agent
 
 mcp = FastMCP("zenith-notetaker")
 _llm = get_llm_client()
@@ -29,6 +30,18 @@ def process_field_note_tool(
         technician: Identifier for the technician filing the note.
     """
     return process_field_note(raw_text, _llm, asset_id=asset_id, technician=technician)
+
+
+@mcp.tool()
+def ask_support_agent_tool(question: str) -> SupportAnswer:
+    """Answer an operations question grounded in Zenith's internal runbooks
+    (power supply failures, network degradation, escalation policy,
+    inventory reorder policy). Cites which doc(s) the answer came from.
+
+    Args:
+        question: The operator's question.
+    """
+    return ask_support_agent(question)
 
 
 if __name__ == "__main__":

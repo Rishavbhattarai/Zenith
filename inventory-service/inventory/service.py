@@ -25,6 +25,15 @@ async def record_installation(
         if part is None:
             return InstallationResult(part_name=part_name, matched=False)
 
+        # Phase 1's telemetry mesh is the actual source of truth for which
+        # asset IDs exist (it generates them dynamically) -- Phase 3's
+        # `assets` table is just lightweight metadata, not a gatekeeping
+        # catalog, so register the asset on first sight rather than
+        # requiring it to have been pre-seeded here.
+        await conn.execute(
+            "INSERT INTO assets (asset_id) VALUES ($1) ON CONFLICT DO NOTHING", asset_id
+        )
+
         new_stock = part["stock_quantity"] - quantity
         await conn.execute(
             "UPDATE parts SET stock_quantity = $1 WHERE id = $2",

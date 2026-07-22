@@ -22,6 +22,11 @@ field-app/.next/
 field-app/.env.local
 field-app/.env
 
+dashboard/node_modules/
+dashboard/.next/
+dashboard/.env.local
+dashboard/.env
+
 # OS
 .DS_Store
 

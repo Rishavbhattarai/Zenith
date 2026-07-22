@@ -10,7 +10,9 @@ from pydantic import BaseModel
 
 from notetaker.config import get_llm_client
 from notetaker.core import process_field_note
+from notetaker.events import EVENT_LOG, AgentEvent
 from notetaker.schema import NoteProcessingResult
+from notetaker.support_agent import SupportAnswer, ask_support_agent
 
 app = FastAPI(title="Zenith Notetaker")
 
@@ -19,7 +21,7 @@ app.add_middleware(
     # Next.js dev picks the first free port starting at 3000, so don't
     # hardcode one — match any localhost dev origin.
     allow_origin_regex=r"http://localhost:\d+",
-    allow_methods=["POST"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -32,6 +34,10 @@ class NoteRequest(BaseModel):
     technician: str = "unspecified"
 
 
+class SupportRequest(BaseModel):
+    question: str
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -40,3 +46,13 @@ def health() -> dict[str, str]:
 @app.post("/notes", response_model=NoteProcessingResult)
 def create_note(req: NoteRequest) -> NoteProcessingResult:
     return process_field_note(req.raw_text, _llm, asset_id=req.asset_id, technician=req.technician)
+
+
+@app.get("/events", response_model=list[AgentEvent])
+def list_events(limit: int = 50) -> list[AgentEvent]:
+    return EVENT_LOG.recent(limit=limit)
+
+
+@app.post("/support/ask", response_model=SupportAnswer)
+def support_ask(req: SupportRequest) -> SupportAnswer:
+    return ask_support_agent(req.question)
