@@ -1,4 +1,4 @@
-from notetaker.safety import check
+from notetaker.safety import IngestionMeshFetcher, check
 from notetaker.schema import FieldNoteExtraction, NoteType, TelemetryAnnotation
 
 
@@ -43,3 +43,15 @@ def test_unverifiable_phrasing_not_flagged():
     result = check(_extraction("kind of okay I guess"), FakeFetcher({"asset-0001": "critical"}))
     assert result.ok
     assert result.warnings == []
+
+
+def test_ingestion_mesh_fetcher_uses_env_var_when_no_base_url_given(monkeypatch):
+    monkeypatch.setenv("INGESTION_MESH_URL", "http://ingestion-mesh:8080")
+    fetcher = IngestionMeshFetcher()
+    assert fetcher._base_url == "http://ingestion-mesh:8080"
+
+
+def test_ingestion_mesh_fetcher_explicit_base_url_wins_over_env(monkeypatch):
+    monkeypatch.setenv("INGESTION_MESH_URL", "http://ingestion-mesh:8080")
+    fetcher = IngestionMeshFetcher(base_url="http://localhost:9999")
+    assert fetcher._base_url == "http://localhost:9999"

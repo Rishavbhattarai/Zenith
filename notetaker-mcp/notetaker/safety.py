@@ -6,6 +6,7 @@ verification step from the handoff doc's vision.
 
 from __future__ import annotations
 
+import os
 from typing import Protocol
 
 import httpx
@@ -35,8 +36,10 @@ class TelemetryFetcher(Protocol):
 class IngestionMeshFetcher:
     """Fetches live asset state from the Phase 1 Go ingestion mesh."""
 
-    def __init__(self, base_url: str = "http://localhost:8080", timeout: float = 3.0) -> None:
-        self._base_url = base_url.rstrip("/")
+    def __init__(self, base_url: str | None = None, timeout: float = 3.0) -> None:
+        self._base_url = (
+            base_url or os.environ.get("INGESTION_MESH_URL", "http://localhost:8080")
+        ).rstrip("/")
         self._timeout = timeout
 
     def fetch_status(self, asset_id: str) -> str | None:

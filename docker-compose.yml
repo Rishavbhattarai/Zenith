@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: zenith
+      POSTGRES_USER: zenith
+      POSTGRES_PASSWORD: zenith
+    ports:
+      - "5432:5432"
+    volumes:
+      - zenith-postgres-data:/var/lib/postgresql/data
+      - ./inventory-service/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zenith"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ingestion-mesh:
+    build:
+      context: ./ingestion-mesh
+    ports:
+      - "8080:8080"
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+    environment:
+      DATABASE_URL: postgresql://zenith:zenith@postgres:5432/zenith
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-32-bytes-minimum}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+
+  notetaker-mcp:
+    build:
+      context: .
+      dockerfile: notetaker-mcp/Dockerfile
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      INVENTORY_SERVICE_URL: http://inventory-service:8001
+      INGESTION_MESH_URL: http://ingestion-mesh:8080
+      FIELD_SERVICE_USERNAME: field-tech-service
+      FIELD_SERVICE_PASSWORD: field-tech-demo-pw
+    depends_on:
+      - ingestion-mesh
+      - inventory-service
+    ports:
+      - "8000:8000"
+
+volumes:
+  zenith-postgres-data:

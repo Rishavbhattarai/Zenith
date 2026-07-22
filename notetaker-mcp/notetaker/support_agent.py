@@ -20,7 +20,17 @@ from pydantic import BaseModel
 
 from notetaker.events import EVENT_LOG
 
-DEFAULT_DOCS_DIR = Path(__file__).resolve().parent.parent.parent / "docs" / "runbooks"
+def _default_docs_dir() -> Path:
+    # RUNBOOKS_DIR lets a containerized deployment (where docs/ isn't
+    # necessarily a sibling of notetaker-mcp/) point elsewhere; otherwise
+    # fall back to the monorepo dev layout (../../docs/runbooks).
+    override = os.environ.get("RUNBOOKS_DIR")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parent.parent.parent / "docs" / "runbooks"
+
+
+DEFAULT_DOCS_DIR = _default_docs_dir()
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 

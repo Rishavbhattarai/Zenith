@@ -4,6 +4,8 @@ over HTTP)."""
 
 from __future__ import annotations
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -16,11 +18,12 @@ from notetaker.support_agent import SupportAnswer, ask_support_agent
 
 app = FastAPI(title="Zenith Notetaker")
 
+# Defaults to any localhost dev port (Next.js picks the first free one
+# starting at 3000). In production, set ALLOWED_ORIGIN_REGEX to match your
+# deployed frontend's origin(s), e.g. r"https://.*\.vercel\.app".
 app.add_middleware(
     CORSMiddleware,
-    # Next.js dev picks the first free port starting at 3000, so don't
-    # hardcode one — match any localhost dev origin.
-    allow_origin_regex=r"http://localhost:\d+",
+    allow_origin_regex=os.environ.get("ALLOWED_ORIGIN_REGEX", r"http://localhost:\d+"),
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
