@@ -1,0 +1,11 @@
+# Go
+ingestion-mesh/ingestor
+*.test
+*.out
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
