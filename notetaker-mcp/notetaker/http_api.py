@@ -29,6 +29,7 @@ _llm = get_llm_client()
 class NoteRequest(BaseModel):
     raw_text: str
     asset_id: str | None = None
+    technician: str = "unspecified"
 
 
 @app.get("/health")
@@ -38,4 +39,4 @@ def health() -> dict[str, str]:
 
 @app.post("/notes", response_model=NoteProcessingResult)
 def create_note(req: NoteRequest) -> NoteProcessingResult:
-    return process_field_note(req.raw_text, _llm, asset_id=req.asset_id)
+    return process_field_note(req.raw_text, _llm, asset_id=req.asset_id, technician=req.technician)

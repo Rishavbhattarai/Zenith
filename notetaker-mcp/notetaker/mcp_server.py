@@ -15,16 +15,20 @@ _llm = get_llm_client()
 
 
 @mcp.tool()
-def process_field_note_tool(raw_text: str, asset_id: str | None = None) -> NoteProcessingResult:
+def process_field_note_tool(
+    raw_text: str, asset_id: str | None = None, technician: str = "unspecified"
+) -> NoteProcessingResult:
     """Extract structured data (action items, parts used, telemetry claims)
-    from a field technician's raw note, and flag any contradictions between
-    the technician's claims and the asset's live telemetry.
+    from a field technician's raw note, flag any contradictions between the
+    technician's claims and the asset's live telemetry, and record any
+    parts used against the inventory system.
 
     Args:
         raw_text: The raw field note, as typed or transcribed from voice.
         asset_id: The asset the technician was physically working on, if known.
+        technician: Identifier for the technician filing the note.
     """
-    return process_field_note(raw_text, _llm, asset_id=asset_id)
+    return process_field_note(raw_text, _llm, asset_id=asset_id, technician=technician)
 
 
 if __name__ == "__main__":

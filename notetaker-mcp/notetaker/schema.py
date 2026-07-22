@@ -44,6 +44,17 @@ class SafetyCheckResult(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class InventoryUpdate(BaseModel):
+    """Outcome of recording one parts_used entry against the Phase 3
+    inventory-service, from notetaker.inventory_client."""
+
+    part_name: str
+    matched: bool
+    new_stock: int | None = None
+    reorder_triggered: bool = False
+
+
 class NoteProcessingResult(BaseModel):
     extraction: FieldNoteExtraction
     safety: SafetyCheckResult
+    inventory: list[InventoryUpdate] = Field(default_factory=list)

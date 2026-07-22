@@ -10,6 +10,12 @@ notetaker-mcp/**/__pycache__/
 notetaker-mcp/.pytest_cache/
 notetaker-mcp/.env
 
+inventory-service/.venv/
+inventory-service/__pycache__/
+inventory-service/**/__pycache__/
+inventory-service/.pytest_cache/
+inventory-service/.env
+
 # Node / Next.js
 field-app/node_modules/
 field-app/.next/
